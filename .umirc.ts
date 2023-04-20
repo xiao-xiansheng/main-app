@@ -10,6 +10,8 @@ export default defineConfig({
     locale: false,
   },
   hash: true,
+  base: '/main/',
+  publicPath: '/main/',
   mountElementId: 'main',
   deadCode: {},
   routes: [

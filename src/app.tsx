@@ -14,7 +14,7 @@ const IconMap: Record<string, React.ReactElement> = {
 const loopMenuItem = (menus: any[]): MenuDataItem[] =>
   menus.map(({ icon, children, ...item }) => ({
     ...item,
-    path: item.menuUrl,
+    path: item.menuUrl || item.path,
     key: item.id,
     icon: icon && IconMap[icon as string],
     hideInMenu: item.menuType === 'H',
@@ -116,22 +116,3 @@ export async function qiankun(): Promise<RuntimeConfig['qiankun']> {
 
   return { apps: [{ name: 'system', entry: '//localhost:3020' }] };
 }
-
-// export const request: RuntimeConfig['request'] = {
-//   requestInterceptors: [
-//     (url, options) => ({
-//       url,
-//       options: {
-//         ...options,
-//         params: {
-//           seq: now(),
-//           ...options.params,
-//         },
-//         headers: {
-//           Authorization: `bearer ${getAccessToken()}`,
-//           ...options.headers,
-//         },
-//       },
-//     }),
-//   ],
-// };

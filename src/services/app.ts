@@ -28,5 +28,5 @@ export async function getCurrent() {
  * @returns
  */
 export async function getApps() {
-  return request('/v1/api/plat-config/applicationInfo', { method: 'POST' });
+  return request('/v1/api/plat-config/applicationInfo');
 }

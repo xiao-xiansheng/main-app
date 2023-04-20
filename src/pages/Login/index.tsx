@@ -6,7 +6,7 @@ import styles from './index.less';
 export default function Page() {
   const { initialState } = useModel('@@initialState');
 
-  if (!initialState?.frontend.client_id) {
+  if (!initialState?.frontend?.client_id) {
     return <PageLoading />;
   }
 
