@@ -1,19 +1,18 @@
-import { request } from '@umijs/max';
-
+import { request } from '@hbasesoft/web-plugin';
 /**
  * 获取配置文件
  * @returns
  */
 export async function getFrontend() {
-  return request('/ui-oauth/frontend.cfg');
+  return request<string>('/ui-oauth/frontend.cfg');
 }
 
 /**
  * 获取菜单
  */
 export async function getMenus() {
-  return request('/v1/plat/configuration/menus/list', {
-    params: { dataType: 'operatePriv' },
+  return request<any[]>('/v1/plat/configuration/menus/list', {
+    data: { dataType: 'operatePriv' },
   });
 }
 
@@ -21,5 +20,13 @@ export async function getMenus() {
  * 查询用户信息
  */
 export async function getCurrent() {
-  return request('/v1/uum/user/account/token');
+  return request<{ userName: string }>('/v1/uum/user/account/token');
+}
+
+/**
+ * 获取子应用
+ * @returns
+ */
+export async function getApps() {
+  return request('/v1/api/plat-config/applicationInfo', { method: 'POST' });
 }

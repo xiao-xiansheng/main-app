@@ -1,11 +1,10 @@
 // 运行时配置
-import { HeartOutlined, SmileOutlined } from '@ant-design/icons';
+import { HeartOutlined, InfoCircleOutlined, LogoutOutlined, SettingOutlined, SmileOutlined } from '@ant-design/icons';
 import type { MenuDataItem } from '@ant-design/pro-components';
 import { codeForToken, desDecrypt, getAccessToken, setAccessToken } from '@hbasesoft/web-plugin';
 import { RuntimeConfig, history } from '@umijs/max';
-import now from 'lodash/now';
 import React from 'react';
-import { getCurrent, getFrontend, getMenus } from './services/app';
+import { getApps, getCurrent, getFrontend, getMenus } from './services/app';
 
 const IconMap: Record<string, React.ReactElement> = {
   smile: <SmileOutlined />,
@@ -26,19 +25,21 @@ const loopMenuItem = (menus: any[]): MenuDataItem[] =>
 // 更多信息见文档：https://umijs.org/docs/api/runtime-config#getinitialstate
 export async function getInitialState(): Promise<{
   name?: string;
+  avatar?: string;
   userInfo?: { userName: string; [key: string]: string };
   frontend?: { client_id: string; client_secret: string; [key: string]: string };
 }> {
   let userInfo = { userName: '' };
-  console.log(1);
   // 初始化请求配置文件
-  const frontend = await getFrontend();
+  const { data: frontend } = await getFrontend();
+
   const frontendJson = JSON.parse(desDecrypt(frontend));
   // end
 
   // 获取用户信息
   if (getAccessToken()) {
-    userInfo = await getCurrent();
+    const { data } = await getCurrent();
+    userInfo = data;
   }
   // end
   return { name: userInfo.userName, userInfo, frontend: frontendJson };
@@ -61,17 +62,21 @@ export const render: RuntimeConfig['render'] = (oldRender) => {
   }
 };
 
-export const layout: RuntimeConfig['layout'] = () => {
+export const layout: RuntimeConfig['layout'] = ({ initialState }) => {
   return {
     title: '@umijs/max',
     logo: 'https://img.alicdn.com/tfs/TB1YHEpwUT1gK0jSZFhXXaAtVXa-28-27.svg',
-    rightContentRender(headerProps, dom, { initialState, setInitialState }) {
-      setInitialState({ ...initialState, name: headerProps.collapsed ? '' : initialState?.userInfo?.userName });
-      return dom;
-    },
-    menuFooterRender: false,
     logout(initialState) {
       console.log(initialState);
+    },
+    actionsRender: (props: any) => [
+      <InfoCircleOutlined key="InfoCircleOutlined" />,
+      <SettingOutlined key="QuestionCircleOutlined" />,
+      <LogoutOutlined key="LogoutOutlined" onClick={() => props?.logout(initialState)} />,
+    ],
+    avatarProps: {
+      title: initialState?.name,
+      src: 'https://gw.alipayobjects.com/zos/antfincdn/efFD%24IOql2/weixintupian_20170331104822.jpg',
     },
     bgLayoutImgList: [
       {
@@ -96,29 +101,37 @@ export const layout: RuntimeConfig['layout'] = () => {
     menu: {
       locale: false,
       request: async () => {
-        const menuData = await getMenus();
-        console.log(loopMenuItem(menuData));
+        const { data: menuData } = await getMenus();
         return loopMenuItem(menuData);
       },
     },
   };
 };
+export async function qiankun(): Promise<RuntimeConfig['qiankun']> {
+  const apps = await getApps()
+    .then((data) => data.data)
+    .catch(() => []);
 
-export const request: RuntimeConfig['request'] = {
-  requestInterceptors: [
-    (url, options) => ({
-      url,
-      options: {
-        ...options,
-        params: {
-          seq: now(),
-          ...options.params,
-        },
-        headers: {
-          Authorization: `bearer ${getAccessToken()}`,
-          ...options.headers,
-        },
-      },
-    }),
-  ],
-};
+  console.log(apps);
+
+  return { apps: [{ name: 'system', entry: '//localhost:3020' }] };
+}
+
+// export const request: RuntimeConfig['request'] = {
+//   requestInterceptors: [
+//     (url, options) => ({
+//       url,
+//       options: {
+//         ...options,
+//         params: {
+//           seq: now(),
+//           ...options.params,
+//         },
+//         headers: {
+//           Authorization: `bearer ${getAccessToken()}`,
+//           ...options.headers,
+//         },
+//       },
+//     }),
+//   ],
+// };

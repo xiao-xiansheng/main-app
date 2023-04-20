@@ -2843,7 +2843,7 @@ packages:
     dev: false
 
   /@hbasesoft/web-plugin/2.0.0_6rr3ktc2uykm6ye32xefzmkmia:
-    resolution: {integrity: sha512-1adBTdYXgq+sQaWf/6M0OAgxntx5AWC9mqmZOQ/z/R9Y0EI4uT3YKjJ2LvgBeebLPsVvU1J8lynD9Nbu+9vdug==}
+    resolution: {integrity: sha512-IPSkEkxTp68pTTUGjBeOfLML1zhnQP22zXS6qBn96p1lY3TEIm0EsDULwKpoA9AELExHmuRW6gR+9Oi1tQGRJg==}
     peerDependencies:
       '@ant-design/icons': '>=5.0.0'
       '@ant-design/pro-components': '>=2.0.0'

@@ -4,7 +4,8 @@ export default defineConfig({
   antd: {},
   model: {},
   initialState: {},
-  request: {},
+  qiankun: { master: {} },
+  request: false,
   layout: {
     locale: false,
   },
@@ -27,19 +28,22 @@ export default defineConfig({
   npmClient: 'pnpm',
   proxy: {
     '/oauth/': {
-      target: 'http://demo.hbasesoft.com:8888/',
+      // target: 'http://demo.hbasesoft.com:8888/',
+      target: 'http://gc.hbasesoft.com:8888/',
       changeOrigin: true,
       pathRewrite: { '^': '' },
       secure: false,
     },
     '/v1/': {
-      target: 'http://demo.hbasesoft.com:8888/',
+      // target: 'http://demo.hbasesoft.com:8888/',
+      target: 'http://gc.hbasesoft.com:8888/',
       changeOrigin: true,
       pathRewrite: { '^': '' },
       secure: false,
     },
     '/ui-oauth/': {
-      target: 'http://demo.hbasesoft.com:8888/',
+      // target: 'http://demo.hbasesoft.com:8888/',
+      target: 'http://gc.hbasesoft.com:8888/',
       changeOrigin: true,
       pathRewrite: { '^': '' },
       secure: false,
