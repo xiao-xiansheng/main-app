@@ -1,3 +1,4 @@
+import { redirectUrl } from '@/constant';
 import { PageLoading } from '@ant-design/pro-components';
 import { OAuth } from '@hbasesoft/web-plugin';
 import { useModel } from '@umijs/max';
@@ -11,10 +12,6 @@ export default function Page() {
   }
 
   return (
-    <OAuth
-      className={styles['main-login']}
-      clientId={initialState?.frontend.client_id}
-      redirectUrl={`${location.origin}/redirectLogin`}
-    />
+    <OAuth className={styles['main-login']} clientId={initialState?.frontend.client_id} redirectUrl={redirectUrl} />
   );
 }

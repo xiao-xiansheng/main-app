@@ -4,7 +4,8 @@ import type { MenuDataItem } from '@ant-design/pro-components';
 import { codeForToken, desDecrypt, getAccessToken, setAccessToken } from '@hbasesoft/web-plugin';
 import { RuntimeConfig, history } from '@umijs/max';
 import React from 'react';
-import { getApps, getCurrent, getFrontend, getMenus } from './services/app';
+import { redirectUrl } from './constant';
+import { getCurrent, getFrontend, getMenus } from './services/app';
 
 const IconMap: Record<string, React.ReactElement> = {
   smile: <SmileOutlined />,
@@ -50,13 +51,13 @@ export const render: RuntimeConfig['render'] = (oldRender) => {
   if (history.location.pathname.includes('/redirectLogin') && location.search.includes('code')) {
     codeForToken({
       code: location.search.split('=')[1],
-      redirectUrl: `${origin}/redirectLogin`,
+      redirectUrl: redirectUrl,
     }).then((data) => {
       setAccessToken(data.data);
-      top!.location.href = '/';
+      top!.location.href = '/main';
     });
   } else if (!history.location.pathname.includes('/Login') && !getAccessToken()) {
-    location.href = '/Login';
+    location.href = '/main/Login';
   } else {
     oldRender();
   }
@@ -69,11 +70,14 @@ export const layout: RuntimeConfig['layout'] = ({ initialState }) => {
     logout(initialState) {
       console.log(initialState);
     },
-    actionsRender: (props: any) => [
-      <InfoCircleOutlined key="InfoCircleOutlined" />,
-      <SettingOutlined key="QuestionCircleOutlined" />,
-      <LogoutOutlined key="LogoutOutlined" onClick={() => props?.logout(initialState)} />,
-    ],
+    actionsRender: (props: any) => {
+      if (props.isMobile) return [];
+      return [
+        <InfoCircleOutlined key="InfoCircleOutlined" />,
+        <SettingOutlined key="QuestionCircleOutlined" />,
+        <LogoutOutlined key="LogoutOutlined" onClick={() => props?.logout(initialState)} />,
+      ];
+    },
     avatarProps: {
       title: initialState?.name,
       src: 'https://gw.alipayobjects.com/zos/antfincdn/efFD%24IOql2/weixintupian_20170331104822.jpg',
@@ -108,11 +112,23 @@ export const layout: RuntimeConfig['layout'] = ({ initialState }) => {
   };
 };
 export async function qiankun(): Promise<RuntimeConfig['qiankun']> {
-  const apps = await getApps()
-    .then((data) => data.data)
-    .catch(() => []);
-
-  console.log(apps);
-
-  return { apps: [{ name: 'system', entry: '//localhost:3020' }] };
+  if (getAccessToken()) {
+    // const apps = await getApps()
+    //   .then((data) => data.data)
+    //   .catch(() => []);
+  }
+  return {
+    base: '/main',
+    apps: [{ name: 'gongcheng', entry: '//localhost:8010' }],
+    routes: [
+      {
+        path: '/gongcheng/*',
+        microApp: 'gongcheng',
+        microAppProps: {
+          autoCaptureError: true,
+          autoSetLoading: true,
+        },
+      },
+    ],
+  };
 }
