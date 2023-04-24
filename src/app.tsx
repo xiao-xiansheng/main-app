@@ -3,13 +3,35 @@ import { HeartOutlined, InfoCircleOutlined, LogoutOutlined, SettingOutlined, Smi
 import type { MenuDataItem } from '@ant-design/pro-components';
 import { codeForToken, desDecrypt, getAccessToken, setAccessToken } from '@hbasesoft/web-plugin';
 import { RuntimeConfig, history } from '@umijs/max';
+import { cloneDeep, forEach } from 'lodash';
 import React from 'react';
 import { redirectUrl } from './constant';
 import { getCurrent, getFrontend, getMenus } from './services/app';
 
+type InitialStateType = {
+  name?: string;
+  userInfo?: { userName: string; [key: string]: string };
+  menuItem?: MenuDataItem[];
+  frontend?: { client_id: string; client_secret: string; [key: string]: string };
+};
+
 const IconMap: Record<string, React.ReactElement> = {
   smile: <SmileOutlined />,
   heart: <HeartOutlined />,
+};
+
+const drawMenuItem = (menu: MenuDataItem[]) => {
+  let result: MenuDataItem[] = [];
+  forEach(menu, (item) => {
+    // 先克隆一份数据作为第一层级的填充
+    let res = cloneDeep(item);
+    result.push(res);
+    if (item.children && item.children.length > 0) {
+      // 如果当前children为数组并且长度大于0，才可进入drawMenuItem()方法
+      result = result.concat(drawMenuItem(item.children));
+    }
+  });
+  return result;
 };
 
 const loopMenuItem = (menus: any[]): MenuDataItem[] =>
@@ -24,12 +46,7 @@ const loopMenuItem = (menus: any[]): MenuDataItem[] =>
 
 // 全局初始化数据配置，用于 Layout 用户信息和权限初始化
 // 更多信息见文档：https://umijs.org/docs/api/runtime-config#getinitialstate
-export async function getInitialState(): Promise<{
-  name?: string;
-  avatar?: string;
-  userInfo?: { userName: string; [key: string]: string };
-  frontend?: { client_id: string; client_secret: string; [key: string]: string };
-}> {
+export async function getInitialState(): Promise<InitialStateType> {
   let userInfo = { userName: '' };
   // 初始化请求配置文件
   const { data: frontend } = await getFrontend();
@@ -43,7 +60,12 @@ export async function getInitialState(): Promise<{
     userInfo = data;
   }
   // end
-  return { name: userInfo.userName, userInfo, frontend: frontendJson };
+  return {
+    name: userInfo.userName,
+    userInfo,
+    menuItem: [],
+    frontend: frontendJson,
+  };
 }
 
 // 渲染之前
@@ -63,7 +85,7 @@ export const render: RuntimeConfig['render'] = (oldRender) => {
   }
 };
 
-export const layout: RuntimeConfig['layout'] = ({ initialState }) => {
+export const layout: RuntimeConfig['layout'] = ({ initialState, setInitialState }) => {
   return {
     title: '@umijs/max',
     logo: 'https://img.alicdn.com/tfs/TB1YHEpwUT1gK0jSZFhXXaAtVXa-28-27.svg',
@@ -106,11 +128,16 @@ export const layout: RuntimeConfig['layout'] = ({ initialState }) => {
       locale: false,
       request: async () => {
         const { data: menuData } = await getMenus();
-        return loopMenuItem(menuData);
+        const menuItem = loopMenuItem(menuData);
+
+        setInitialState({ ...initialState, menuItem: drawMenuItem(menuItem) });
+
+        return menuItem;
       },
     },
   };
 };
+
 export async function qiankun(): Promise<RuntimeConfig['qiankun']> {
   if (getAccessToken()) {
     // const apps = await getApps()
