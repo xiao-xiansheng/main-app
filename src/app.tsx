@@ -1,10 +1,10 @@
 // 运行时配置
-import { HeartOutlined, InfoCircleOutlined, LogoutOutlined, SettingOutlined, SmileOutlined } from '@ant-design/icons';
+import IconMap from '@/constant/iconMap';
+import { InfoCircleOutlined, LogoutOutlined, SettingOutlined } from '@ant-design/icons';
 import type { MenuDataItem } from '@ant-design/pro-components';
 import { codeForToken, desDecrypt, getAccessToken, setAccessToken } from '@hbasesoft/web-plugin';
 import { RuntimeConfig, history } from '@umijs/max';
-import { cloneDeep, forEach } from 'lodash';
-import React from 'react';
+import { cloneDeep, concat, forEach } from 'lodash';
 import { redirectUrl } from './constant';
 import { getCurrent, getFrontend, getMenus } from './services/app';
 
@@ -15,20 +15,13 @@ type InitialStateType = {
   frontend?: { client_id: string; client_secret: string; [key: string]: string };
 };
 
-const IconMap: Record<string, React.ReactElement> = {
-  smile: <SmileOutlined />,
-  heart: <HeartOutlined />,
-};
-
 const drawMenuItem = (menu: MenuDataItem[]) => {
   let result: MenuDataItem[] = [];
   forEach(menu, (item) => {
-    // 先克隆一份数据作为第一层级的填充
     let res = cloneDeep(item);
     result.push(res);
     if (item.children && item.children.length > 0) {
-      // 如果当前children为数组并且长度大于0，才可进入drawMenuItem()方法
-      result = result.concat(drawMenuItem(item.children));
+      result = concat(result, drawMenuItem(item.children));
     }
   });
   return result;
@@ -129,9 +122,7 @@ export const layout: RuntimeConfig['layout'] = ({ initialState, setInitialState 
       request: async () => {
         const { data: menuData } = await getMenus();
         const menuItem = loopMenuItem(menuData);
-
         setInitialState({ ...initialState, menuItem: drawMenuItem(menuItem) });
-
         return menuItem;
       },
     },
@@ -146,9 +137,11 @@ export async function qiankun(): Promise<RuntimeConfig['qiankun']> {
   }
   return {
     base: '/main',
+    singular: false,
     apps: [{ name: 'gongcheng', entry: '//localhost:8010' }],
     routes: [
       {
+        layout: '@/layouts/index',
         path: '/gongcheng/*',
         microApp: 'gongcheng',
         microAppProps: {
