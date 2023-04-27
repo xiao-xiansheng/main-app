@@ -50,7 +50,7 @@ export default function Index() {
       console.log(activeMenuItem);
 
       // 当前选中的key
-      setActiveKey(activeMenuItem.id);
+      setActiveKey(activeMenuItem?.id);
       // 当前选中菜单
       setActiveMenuItem(activeMenuItem);
       // 如果存在就不继续添加了
